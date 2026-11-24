@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-palette="classic">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#111318" id="meta-theme-color" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="description" content="Play TRIAD — a fast, minimalist visual pattern card game in your browser with smart speed scoring, Daily Puzzle, 3rd Card Builder, and 60s Blitz." />
+  <title>TRIAD — Pattern Card Game</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231B1E26' stroke='%232E3442' stroke-width='2'/%3E%3Cg transform='translate(14, 4) scale(0.28)'%3E%3Cpath d='M 16 58 C 16 33, 33 12, 56 12 C 73 12, 81 16, 82 30 C 80 45, 63 60, 63 78 C 63 100, 84 118, 84 142 C 84 167, 67 188, 44 188 C 27 188, 19 184, 18 170 C 20 155, 37 140, 37 122 C 37 100, 16 82, 16 58 Z' fill='%232DD4BF' stroke='%232DD4BF' stroke-width='8' stroke-linejoin='round'/%3E%3C/g%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <canvas id="confetti-canvas" aria-hidden="true"></canvas>
+
+  <div class="app-shell">
+    <!-- Top Header -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 100 200" width="16" height="28">
+            <path d="M 16 58 C 16 33, 33 12, 56 12 C 73 12, 81 16, 82 30 C 80 45, 63 60, 63 78 C 63 100, 84 118, 84 142 C 84 167, 67 188, 44 188 C 27 188, 19 184, 18 170 C 20 155, 37 140, 37 122 C 37 100, 16 82, 16 58 Z" fill="var(--triad-teal)" stroke="var(--triad-teal)" stroke-width="8" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">TRIAD</span>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <button class="icon-btn" id="btn-sound" type="button" title="Toggle sound" aria-label="Toggle sound">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path class="sound-wave" d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path class="sound-wave" d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+        </button>
+
+        <button class="icon-btn" id="btn-colorblind" type="button" title="Toggle colorblind-friendly palette" aria-label="Toggle colorblind-friendly palette" aria-pressed="false">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="6" cy="14" r="4"></circle>
+            <circle cx="18" cy="14" r="4"></circle>
+            <path d="M10 14h4"></path>
+            <path d="M2 14V9a2 2 0 0 1 2-2h1"></path>
+            <path d="M22 14V9a2 2 0 0 0-2-2h-1"></path>
+          </svg>
+        </button>
+
+        <button class="icon-btn" id="btn-theme" type="button" title="Switch theme (Dark / Light)" aria-label="Switch theme">
+          <svg class="icon-svg icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+          </svg>
+          <svg class="icon-svg icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        <button class="icon-btn" id="btn-stats" type="button" title="Records &amp; Stats" aria-label="Records and Stats">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+            <path d="M4 22h16"></path>
+            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+            <path d="M14 14.66V17c0 .55-.47.98-.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+            <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+          </svg>
+        </button>
+
+        <button class="icon-btn" id="btn-help" type="button" title="How to play" aria-label="How to play">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <path d="M12 17h.01"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Mode Selector Tabs -->
+    <nav class="mode-bar" aria-label="Game Modes">
+      <div class="mode-tabs" role="tablist">
+        <button class="mode-tab active" role="tab" aria-selected="true" data-mode="solo" type="button">
+          <span class="mode-tab-label">Classic</span>
+          <span class="mode-tab-tag">81</span>
+        </button>
+        <button class="mode-tab" role="tab" aria-selected="false" data-mode="daily" type="button">
+          <span class="mode-tab-label">Daily</span>
+        </button>
+        <button class="mode-tab" role="tab" aria-selected="false" data-mode="builder" type="button">
+          <span class="mode-tab-label">3rd Card</span>
+        </button>
+        <button class="mode-tab" role="tab" aria-selected="false" data-mode="blitz" type="button">
+          <span class="mode-tab-label">Blitz</span>
+          <span class="mode-tab-tag">60s</span>
+        </button>
+      </div>
+
+      <!-- Mode Sub-Options -->
+      <div class="submode-strip" id="submode-strip"></div>
+    </nav>
+
+    <!-- Live HUD -->
+    <section class="hud" aria-label="Scoreboard">
+      <div class="hud-card">
+        <span class="hud-label" id="hud-score-label">Score</span>
+        <div class="hud-value-wrap">
+          <span class="hud-value tabular" id="hud-score">0</span>
+          <span class="hud-delta" id="hud-delta" aria-live="polite"></span>
+        </div>
+      </div>
+
+      <div class="hud-card">
+        <span class="hud-label" id="hud-time-label">Time</span>
+        <div class="hud-value-wrap">
+          <span class="hud-value tabular" id="hud-time">00:00</span>
+          <span class="hud-best tabular" id="hud-best-time" title="Personal Best"></span>
+        </div>
+      </div>
+
+      <div class="hud-card" id="hud-deck-card">
+        <span class="hud-label" id="hud-third-label">Deck</span>
+        <div class="hud-value-wrap deck-wrap">
+          <span class="deck-stack" id="deck-stack" aria-hidden="true">
+            <span class="deck-layer"></span>
+            <span class="deck-layer"></span>
+            <span class="deck-layer"></span>
+          </span>
+          <span class="hud-value tabular" id="hud-third">72</span>
+        </div>
+      </div>
+
+      <div class="hud-card hud-streak-card">
+        <span class="hud-label" id="hud-fourth-label">Streak</span>
+        <div class="hud-value-wrap">
+          <span class="hud-value tabular" id="hud-fourth">0</span>
+          <span class="hud-subbadge" id="hud-combo-badge"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Feedback Toast Banner -->
+    <div class="feedback-slot">
+      <div class="feedback-pill" id="feedback-pill" role="status" aria-live="polite"></div>
+    </div>
+
+    <!-- Main Play Area -->
+    <main class="play-area" id="play-area">
+      <!-- Board Container (Classic / Daily / Blitz) -->
+      <div class="board-stage" id="board-stage">
+        <div class="card-grid" id="card-grid" data-cols="3"></div>
+      </div>
+
+      <!-- 3rd Card Builder Container -->
+      <div class="builder-stage" id="builder-stage" hidden>
+        <div class="builder-cards-row">
+          <div class="builder-slot">
+            <div class="builder-card-mount" id="builder-card-a"></div>
+          </div>
+          <div class="builder-operator" aria-hidden="true">+</div>
+          <div class="builder-slot">
+            <div class="builder-card-mount" id="builder-card-b"></div>
+          </div>
+          <div class="builder-operator" aria-hidden="true">=</div>
+          <div class="builder-slot">
+            <div class="builder-card-mount builder-preview" id="builder-card-preview"></div>
+          </div>
+        </div>
+
+        <div class="builder-controls" id="builder-controls">
+          <div class="attr-group" data-attr="number" aria-label="Count">
+            <div class="attr-pills">
+              <button class="attr-pill" type="button" data-val="0">1</button>
+              <button class="attr-pill" type="button" data-val="1">2</button>
+              <button class="attr-pill" type="button" data-val="2">3</button>
+            </div>
+          </div>
+
+          <div class="attr-group" data-attr="color" aria-label="Color">
+            <div class="attr-pills">
+              <button class="attr-pill" type="button" data-val="0"><span class="swatch swatch-0"></span><span class="color-name-0">Coral</span></button>
+              <button class="attr-pill" type="button" data-val="1"><span class="swatch swatch-1"></span><span class="color-name-1">Teal</span></button>
+              <button class="attr-pill" type="button" data-val="2"><span class="swatch swatch-2"></span><span class="color-name-2">Amber</span></button>
+            </div>
+          </div>
+
+          <div class="attr-group" data-attr="shape" aria-label="Shape">
+            <div class="attr-pills">
+              <button class="attr-pill" type="button" data-val="0">
+                <svg class="mini-shape" viewBox="0 0 100 200"><path d="M 50 14 L 86 52 L 86 148 L 50 186 L 14 148 L 14 52 Z" fill="none" stroke="currentColor" stroke-width="11" stroke-linejoin="round"/></svg>
+                <span>Hex</span>
+              </button>
+              <button class="attr-pill" type="button" data-val="1">
+                <svg class="mini-shape" viewBox="0 0 100 200"><path d="M 50 14 A 32 86 0 1 0 50 186 A 32 86 0 1 0 50 14 Z" fill="none" stroke="currentColor" stroke-width="11"/></svg>
+                <span>Ellipse</span>
+              </button>
+              <button class="attr-pill" type="button" data-val="2">
+                <svg class="mini-shape" viewBox="0 0 100 200"><path d="M 16 58 C 16 33, 33 12, 56 12 C 73 12, 81 16, 82 30 C 80 45, 63 60, 63 78 C 63 100, 84 118, 84 142 C 84 167, 67 188, 44 188 C 27 188, 19 184, 18 170 C 20 155, 37 140, 37 122 C 37 100, 16 82, 16 58 Z" fill="none" stroke="currentColor" stroke-width="11" stroke-linejoin="round"/></svg>
+                <span>Wave</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="attr-group" data-attr="shading" aria-label="Fill">
+            <div class="attr-pills">
+              <button class="attr-pill" type="button" data-val="0">
+                <span class="shade-chip shade-open"></span><span>Open</span>
+              </button>
+              <button class="attr-pill" type="button" data-val="1">
+                <span class="shade-chip shade-striped"></span><span>Striped</span>
+              </button>
+              <button class="attr-pill" type="button" data-val="2">
+                <span class="shade-chip shade-solid"></span><span>Solid</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="builder-footer">
+          <button class="btn btn-primary btn-lg" id="btn-builder-check" type="button" disabled>Check Triad</button>
+        </div>
+      </div>
+
+      <!-- Found Triads Strip (Daily Mode Only) -->
+      <section class="history-section" id="history-section" aria-label="Found Triads" hidden>
+        <div class="history-header">
+          <span class="history-title" id="history-title">Found (0/6)</span>
+        </div>
+        <div class="history-list" id="history-list" hidden></div>
+      </section>
+
+      <!-- Pause Overlay -->
+      <div class="pause-veil" id="pause-veil" hidden>
+        <div class="pause-box">
+          <p class="pause-title">Game Paused</p>
+          <p class="pause-sub">Cards are hidden and the timer is paused.</p>
+          <button class="btn btn-primary" id="btn-resume" type="button">Resume</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Action Bar -->
+    <footer class="action-bar" id="action-bar">
+      <button class="btn btn-accent action-no-triad" id="btn-no-triad" type="button">
+        <span>No Triad!</span>
+      </button>
+
+      <button class="btn btn-secondary" id="btn-hint" type="button">
+        <span>Hint</span>
+      </button>
+
+      <button class="btn btn-ghost" id="btn-pause" type="button" title="Pause game">
+        <span>Pause</span>
+      </button>
+
+      <button class="btn btn-ghost" id="btn-restart" type="button">
+        <span>New</span>
+      </button>
+    </footer>
+  </div>
+
+  <!-- Modal: Victory / Round End -->
+  <div class="modal-backdrop" id="modal-gameover" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="gameover-title">
+      <div class="modal-badge" id="gameover-badge">Round Complete</div>
+      <h2 class="modal-title" id="gameover-title">All 81 Cards Played!</h2>
+      <p class="modal-subtitle" id="gameover-subtitle"></p>
+
+      <div class="record-banners" id="record-banners"></div>
+
+      <div class="summary-grid" id="gameover-summary"></div>
+
+      <div class="leftover-box" id="leftover-box" hidden>
+        <p class="leftover-label" id="leftover-label">Remaining cards with no Triad:</p>
+        <div class="leftover-cards" id="leftover-cards"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="btn-copy-result" type="button" hidden>Copy Result</button>
+        <button class="btn btn-ghost" id="btn-open-stats-from-end" type="button">Leaderboard</button>
+        <button class="btn btn-primary" id="btn-play-again" type="button">Play Again</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Highscores & Stats -->
+  <div class="modal-backdrop" id="modal-stats" hidden>
+    <div class="modal-card modal-wide" role="dialog" aria-modal="true" aria-labelledby="stats-title">
+      <div class="modal-head">
+        <h2 class="modal-title" id="stats-title">Records &amp; Statistics</h2>
+        <button class="icon-btn modal-close" data-close="modal-stats" type="button" aria-label="Close">&times;</button>
+      </div>
+
+      <div class="stats-tabs" id="stats-mode-tabs">
+        <button class="stats-tab active" data-stat-mode="solo-9" type="button">Classic (9)</button>
+        <button class="stats-tab" data-stat-mode="solo-12" type="button">Classic (12)</button>
+        <button class="stats-tab" data-stat-mode="daily" type="button">Daily</button>
+        <button class="stats-tab" data-stat-mode="builder" type="button">3rd Card</button>
+        <button class="stats-tab" data-stat-mode="blitz" type="button">Blitz (60s)</button>
+      </div>
+
+      <div class="stats-kpi-grid" id="stats-kpi-grid"></div>
+
+      <div class="leaderboard-wrap">
+        <h3 class="section-mini-title">Top Runs</h3>
+        <div class="leaderboard-list" id="leaderboard-list"></div>
+      </div>
+
+      <div class="modal-actions modal-actions-split">
+        <button class="btn btn-ghost btn-danger-text" id="btn-reset-stats" type="button">Reset Data</button>
+        <button class="btn btn-primary" data-close="modal-stats" type="button">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Rules Only -->
+  <div class="modal-backdrop" id="modal-help" hidden>
+    <div class="modal-card modal-wide" role="dialog" aria-modal="true" aria-labelledby="help-title">
+      <div class="modal-head">
+        <h2 class="modal-title" id="help-title">How to Play TRIAD</h2>
+        <button class="icon-btn modal-close" data-close="modal-help" type="button" aria-label="Close">&times;</button>
+      </div>
+
+      <div class="help-panel">
+        <p class="help-lead">Each of the <strong>81 cards</strong> has 4 attributes with 3 values each: <strong>Count</strong> (1, 2, 3), <strong>Color</strong> (Coral, Teal, Amber), <strong>Shape</strong> (Hex, Ellipse, Wave), and <strong>Fill</strong> (Open, Striped, Solid).</p>
+
+        <div class="rule-callout">
+          <strong>The Golden Rule:</strong> Three cards form a valid <strong>Triad</strong> if, for <em>each individual attribute</em>, all three cards are either <strong>all the same</strong> or <strong>all different</strong>.
+        </div>
+
+        <div class="example-block">
+          <div class="example-label good">✓ Valid Triad (all attributes different)</div>
+          <div class="example-trio" id="help-example-good"></div>
+          <p class="example-note">Count: 1, 2, 3 (all different) · Color: Coral, Teal, Amber (all different) · Shape &amp; Fill: also all different.</p>
+        </div>
+
+        <div class="example-block">
+          <div class="example-label bad">✗ Not a Triad (Color breaks the rule)</div>
+          <div class="example-trio" id="help-example-bad"></div>
+          <p class="example-note">Two cards are Coral and one is Amber — neither all the same nor all different.</p>
+        </div>
+
+        <ul class="help-bullets">
+          <li><strong>Minimum 9 Cards:</strong> Classic mode always keeps at least 9 cards on the table. Finding a Triad on 9 cards refills 3 new random cards from the deck until the draw pile is empty.</li>
+          <li><strong>No Triad!:</strong> If no valid Triad exists on the table, tap <em>No Triad!</em> to earn bonus points and deal 3 more random cards — until every card has been played and no Triad remains.</li>
+          <li><strong>Smart Speed Scoring:</strong> Finding Triads faster earns more points, and the computer factors in how many Triads were available: spotting the sole Triad pays far more than picking quickly on a board with 8 or 10 Triads. Completed runs save your Best Time and Highscore.</li>
+        </ul>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-primary" data-close="modal-help" type="button">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
