@@ -255,6 +255,16 @@
     };
   }
 
+  function sanitizeStatBucket(raw) {
+    const b = { ...createEmptyStatBucket(), ...(raw || {}) };
+    b.runs = Array.isArray(b.runs) ? b.runs.filter((r) => r && typeof r.score === "number") : [];
+    if (b.bestTimeMs !== null && b.bestTimeMs <= 0) {
+      const validTimes = b.runs.map((r) => r.timeMs).filter((t) => typeof t === "number" && t > 0);
+      b.bestTimeMs = validTimes.length > 0 ? Math.min(...validTimes) : null;
+    }
+    return b;
+  }
+
   function loadStore() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -266,11 +276,11 @@
         ...parsed,
         settings: { ...base.settings, ...(parsed.settings || {}) },
         stats: {
-          "solo-9": { ...createEmptyStatBucket(), ...(parsed.stats?.["solo-9"] || {}) },
-          "solo-12": { ...createEmptyStatBucket(), ...(parsed.stats?.["solo-12"] || {}) },
-          daily: { ...createEmptyStatBucket(), ...(parsed.stats?.daily || {}) },
-          builder: { ...createEmptyStatBucket(), ...(parsed.stats?.builder || {}) },
-          blitz: { ...createEmptyStatBucket(), ...(parsed.stats?.blitz || {}) },
+          "solo-9": sanitizeStatBucket(parsed.stats?.["solo-9"]),
+          "solo-12": sanitizeStatBucket(parsed.stats?.["solo-12"]),
+          daily: sanitizeStatBucket(parsed.stats?.daily),
+          builder: sanitizeStatBucket(parsed.stats?.builder),
+          blitz: sanitizeStatBucket(parsed.stats?.blitz),
         },
         dailyCompleted: parsed.dailyCompleted || {},
       };
@@ -1736,8 +1746,8 @@
   // =========================================================================
   function finishGame() {
     if (state.isFinished) return;
-    state.isFinished = true;
     stopTimer();
+    state.isFinished = true;
     AudioEngine.win();
 
     const totalMs = state.mode === "blitz" ? state.blitzDurationMs : getActiveElapsedMs();
